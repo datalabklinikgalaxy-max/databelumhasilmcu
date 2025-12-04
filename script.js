@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageElement = document.getElementById('message');
     const submitButton = form.querySelector('.btn-submit');
 
+    // URL GOOGLE APPS SCRIPT
     const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwmzbJosB8UR6JdwspkwTJrYDeLq8XBxyC1rTJhT7ZByyHh1LS1ErfJCHr0m-ajf8Ua/exec';
 
     form.addEventListener('submit', async function(event) {
@@ -14,18 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const noHandphone = document.getElementById('no_handphone').value.trim();
 
         if (nipNik === '' || namaPeserta === '' || departemen === '' || noHandphone === '') {
-            showMessage('Semua kolom WAJIB diisi!', 'error');
+            showMessage('⚠️ Semua kolom wajib diisi!', 'error');
             return;
         }
 
         const phoneRegex = /^\d{9,15}$/;
         if (!phoneRegex.test(noHandphone)) {
-            showMessage('Format No Handphone tidak valid (hanya angka, 9-15 digit).', 'error');
+            showMessage('📵 Nomor handphone tidak valid (hanya angka 9–15 digit).', 'error');
             return;
         }
-        
+
         submitButton.disabled = true;
-        submitButton.textContent = '⏳ Mengirim Data...';
+        submitButton.textContent = '⏳ Mengirim...';
 
         const formData = new FormData();
         formData.append('nip_nik', nipNik);
@@ -40,21 +41,35 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (!response.ok) {
-                throw new Error(`Gagal koneksi ke server. Status: ${response.status}`);
+                throw new Error(`Koneksi gagal. Status: ${response.status}`);
             }
-            
+
             const result = await response.json();
 
             if (result && result.result === 'success') {
-                showMessage(`✅ Data berhasil disimpan di baris #${result.row_added}!`, 'success');
+
+                /** PESAN SUKSES FIX */
+                messageElement.style.display = 'block';
+                messageElement.style.backgroundColor = '#d4edda';
+                messageElement.style.color = '#155724';
+                messageElement.style.border = '2px solid #28a745';
+                messageElement.style.padding = '15px';
+                messageElement.style.fontSize = '1.2rem';
+                messageElement.style.fontWeight = 'bold';
+                messageElement.style.textAlign = 'center';
+                messageElement.style.borderRadius = '8px';
+                messageElement.innerHTML = 
+                `✅ DATA BERHASIL DISIMPAN.<br>
+                📩 Hasil MCU akan dikirim melalui WhatsApp.`;
+
                 form.reset();
             } else {
-                throw new Error('Respon server tidak valid.');
+                throw new Error('Respon sistem tidak valid.');
             }
 
         } catch (error) {
-            console.error('Error:', error);
-            showMessage('❌ Terjadi kesalahan. Pastikan Script & Deployment sudah aktif.', 'error');
+            console.error(error);
+            showMessage('❌ Gagal menyimpan! Periksa koneksi dan script Google.', 'error');
         } finally {
             submitButton.disabled = false;
             submitButton.textContent = 'SIMPAN DATA';
@@ -67,14 +82,13 @@ document.addEventListener('DOMContentLoaded', () => {
         messageElement.style.display = 'block';
 
         if (type === 'success') {
-            messageElement.classList.add('success');
+            messageElement.style.backgroundColor = '#d4edda';
+            messageElement.style.color = '#155724';
+            messageElement.style.border = '1px solid #28a745';
         } else {
-            messageElement.classList.add('error');
+            messageElement.style.backgroundColor = '#f8d7da';
+            messageElement.style.color = '#721c24';
+            messageElement.style.border = '1px solid #f5c6cb';
         }
-
-        setTimeout(() => {
-            messageElement.style.display = 'none';
-        }, 5000);
     }
 });
-
